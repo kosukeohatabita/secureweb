@@ -32,16 +32,18 @@
 @ENGINE vol.4
 
 - - -
-#topic
+##思いつく脆弱性たち
 ---
 * XSS
 * XSRF(CSRF)
-* セッションハイジャック
-* セッションフィクセーション
 * HTTPヘッダインジェクション
 * SQLインジェクション
+* セッションハイジャック
+* セッションフィクセーション
 * OSコマンド・インジェクション
-
+* バッファオーバーフロー
+* クリックジャッキング
+* DOSアタック
 
 ---
 # XSS
@@ -54,14 +56,42 @@ cross site scripting
 
 - - -
 
+こんな感じのjsでbodyを生成してるページがあるとして。
+
+```
+var hash = location.hash.slice(1);
+$('body').html(hash);
+```
 
 - - -
 
-1.HTTP レスポンスヘッダーに文字コードを指定する
-2.HTML 要素の属性は""(ダブルクオーテーション)で囲む
-3.出力する全ての要素に対してエスケープ処理を行う
-<!-- 4.URL は「"http://"」か「https://」で始まるもののみ出力する
-5.<script></script> 要素の内容を動的に生成しない -->
+こういったことをするのがXSS
+
+http://my-web-app/index.html#＜script＞alert(XSSですよ)＜/script＞
+
+- - -
+
+formとかでエスケープとかちゃんとしてないとこういうことができます。
+
+これでcookieを抜き取れば"セッションハイジャック"
+
+- - -
+
+DOM based XSS
+
+とか
+
+mXSS
+
+も
+
+- - -
+
+##対策
+
+1. HTTP レスポンスヘッダーに文字コードを指定する
+2. HTML 要素の属性は""で囲む
+3. 出力する要素はエスケープする
 
 ---
 # csrf
@@ -70,40 +100,15 @@ cross site request forgery
 
 - - -
 
-正規のユーザーの権限を利用し、特定の処理を行うページに誘導させ強制的に 意図しない処理を行わせる
+ユーザーのサーバー上で不正なスクリプトを動かす
 
 - - -
 
 対策
 
-*GETではなくPOSTする。
-*トークンを発行する。
-*パスワードの再入力をさせる。
-*Refererのリンク元を確認させる。
-
-- - -
-
-参考:
-
-http://www.jumperz.net/texts/csrf.htm
-
-http://qiita.com/mpyw/items/8f8989f8575159ce95fc
-
----
-## セッションハイジャック
----
-session hi-jack
-
-- - -
-*
-
----
-## セッションフィクセーション
----
-session ficsation
-
-- - -
-*
+* hiddenパラメータ+POST
+* パスワードの再入力をさせる
+* Refererのリンク元を確認させる
 
 ---
 ## HTTPヘッダインジェクション
@@ -111,7 +116,8 @@ session ficsation
 http header injection
 
 - - -
-*
+
+HTTPヘッダに改行仕込んで、それ以下で任意のコードを実行させる
 
 ---
 ## SQLインジェクション
@@ -129,6 +135,21 @@ sanitizeしましょう
 - - -
 
 不正入力により任意のOSコマンドを実行させる
+
+- - -
+
+rubyとか気をつけて
+
+---
+
+参考:
+
+* http://www.jumperz.net/texts/csrf.htm
+* http://app.codegrid.net/entry/security-xss
+* http://qiita.com/mpyw/items/8f8989f8575159ce95fc
+* http://www.slideshare.net/masatokinugawa/ss-51723687
+
+
 
 ---
 # fin
